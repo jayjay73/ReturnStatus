@@ -55,6 +55,7 @@ sub new {
 
 
     #my $mypackage= (caller(0))[0];
+    # package name of the callee (this sub)
     my ($mypackage)= split '::', (caller(0))[3];
     #warn "caller 0: ", caller(0);
     #warn "caller 1: ", caller(1);

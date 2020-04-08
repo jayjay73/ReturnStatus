@@ -34,11 +34,11 @@ sub stringify {
     my $message= $self->{message};
     if (chomp $message) {
         #warn "chomped";
-        my $lineend= (caller eq 'Throwable') ? "\n" : "";
+        my $lineend= (caller eq 'Throwable' or caller eq 'Template::Exception') ? "\n" : "";
         $ret_str= join (' ', $self->code, $message) . $lineend;
     } else {
         #warn "no chomp";
-        my $lineend= (caller eq 'Throwable') ? " at $self->{_filename2} line $self->{_line2}\n" : "";
+        my $lineend= (caller eq 'Throwable' or caller eq 'Template::Exception') ? " at $self->{_filename2} line $self->{_line2}\n" : "";
         $ret_str= join (' ', $self->code, $message, "[in $self->{_caller2}(), at or above $self->{_filename}:$self->{_line}]") . $lineend;
     }
     return $ret_str;
@@ -165,7 +165,16 @@ sub _conditional {
     my $arg2;
     # if called as success(), $retval is the first argument, but we
     # need it last. So move it to the end of the arg array.
+    #warn "stack size: " . scalar(@_);
+    #warn "stack size: " . $#_;
     if ($return_success) {
+        # called with no arguments, push 1 (true) as a return value
+        if ($#_ < 0) { push @_, 1; }
+
+        # if we were called with just one value (the return value)
+        # push dummy values onto the argument list.
+        if ($#_ < 1) { push @_, (undef, undef); }
+
         push @_, shift;
     }
     ($arg2)= @_;
@@ -193,6 +202,7 @@ sub _conditional {
 
     # we got passed an unblessed dictionary
     elsif (defined reftype $arg2 && (reftype $arg2 eq reftype {}) ) {
+        #warn "got an unblessed dictionary";
         $is_error= defined $return_success ? ! $return_success : $arg2->{is_error};
         $code= $arg2->{code};
         $message= $arg2->{message};

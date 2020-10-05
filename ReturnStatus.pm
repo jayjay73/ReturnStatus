@@ -31,15 +31,16 @@ sub stringify {
     #my $caller= caller;
     #warn $caller;
     my $ret_str;
-    my $message= $self->{message};
+    my $message= (defined $self->{message}) ? $self->{message} : '';
+    my $code= (defined $self->{code}) ? $self->{code} : '';
     if (chomp $message) {
         #warn "chomped";
         my $lineend= (caller eq 'Throwable' or caller eq 'Template::Exception') ? "\n" : "";
-        $ret_str= join (' ', $self->code, $message) . $lineend;
+        $ret_str= join (' ', $code, $message) . $lineend;
     } else {
         #warn "no chomp";
         my $lineend= (caller eq 'Throwable' or caller eq 'Template::Exception') ? " at $self->{_filename2} line $self->{_line2}\n" : "";
-        $ret_str= join (' ', $self->code, $message, "[in $self->{_caller2}(), at or above $self->{_filename}:$self->{_line}]") . $lineend;
+        $ret_str= join (' ', $code, $message, "[in $self->{_caller2}(), at or above $self->{_filename}:$self->{_line}]") . $lineend;
     }
     return $ret_str;
 }
